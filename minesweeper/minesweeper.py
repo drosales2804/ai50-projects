@@ -230,7 +230,8 @@ class MinesweeperAI():
                     new_sentence_cells.add((i, j))
 
         # Add the new sentence to the AI's Knowledge Base:
-        print(f'Move on cell: {cell} has added sentence to knowledge {new_sentence_cells} = {count}' )
+        print(
+            f'Move on cell: {cell} has added sentence to knowledge {new_sentence_cells} = {count}')
         self.knowledge.append(Sentence(new_sentence_cells, count))
 
         # Iteratively mark guaranteed mines and safes, and infer new knowledge:
@@ -265,7 +266,6 @@ class MinesweeperAI():
             # Try to infer new sentences from the current ones:
             for sentence_1 in self.knowledge:
                 for sentence_2 in self.knowledge:
-
                     # Ignore when sentences are identical
                     if sentence_1.cells == sentence_2.cells:
                         continue
@@ -284,7 +284,8 @@ class MinesweeperAI():
                         # Add to knowledge if not already in KB:
                         if new_sentence not in self.knowledge:
                             knowledge_changed = True
-                            print('New Inferred Knowledge: ', new_sentence, 'from', sentence_1, ' and ', sentence_2)
+                            print('New Inferred Knowledge:', new_sentence,
+                                  'from', sentence_1, 'and', sentence_2)
                             self.knowledge.append(new_sentence)
 
         # Print out AI current knowledge to terminal:
