@@ -1,7 +1,6 @@
 import csv
 import sys
-
-from util import Node, StackFrontier, QueueFrontier
+from util import Node, QueueFrontier
 
 # Maps names to a set of corresponding person_ids
 names = {}
@@ -11,46 +10,6 @@ people = {}
 
 # Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
 movies = {}
-
-
-class Node:
-    def __init__(self, state, parent, action):
-        self.state = state
-        self.parent = parent
-        self.action = action
-
-
-class StackFrontier:
-    def __init__(self):
-        self.frontier = []
-
-    def add(self, node):
-        self.frontier.append(node)
-
-    def contains_state(self, state):
-        return any(node.state == state for node in self.frontier)
-
-    def empty(self):
-        return len(self.frontier) == 0
-
-    def remove(self):
-        if self.empty():
-            raise Exception("empty frontier")
-        else:
-            node = self.frontier[-1]
-            self.frontier = self.frontier[:-1]
-            return node
-
-
-class QueueFrontier(StackFrontier):
-
-    def remove(self):
-        if self.empty():
-            raise Exception("empty frontier")
-        else:
-            node = self.frontier[0]
-            self.frontier = self.frontier[1:]
-            return node
 
 
 def load_data(directory):
@@ -134,43 +93,38 @@ def shortest_path(source, target):
     num_explored = 0
     explored = set()
 
+    # Initialize the frontier with the starting position
     start = Node(state=source, parent=None, action=None)
-    frontier = StackFrontier()
+    frontier = QueueFrontier()
     frontier.add(start)
 
-    while True:
+    # Perform BFS
+    while not frontier.empty():
 
-        # Empty frontier means none path exists
-        if frontier.empty():
-            return None
-
-        # Choose a node from the frontier
+        # Remove a node from the frontier
         node = frontier.remove()
         num_explored += 1
 
-        # Record explored node
+        # If node contains the goal state, return the solution
+        if node.state == target:
+            path = []
+            while node.parent is not None:
+                path.append((node.action, node.state))
+                node = node.parent
+            path.reverse()
+            return path
+
+        # Mark node as explored
         explored.add(node.state)
-        # Find co-stars
-        neighbors = neighbors_for_person(node.state)
 
-        # Add neighbors to frontier
-        for action, state in neighbors:
-            if not frontier.contains_state(state) and state not in explored:
+        # Add neighbors to the frontier
+        for action, state in neighbors_for_person(node.state):
+            if state not in explored and not frontier.contains_state(state):
                 child = Node(state=state, parent=node, action=action)
-
-                # Check if the child node contains the solution
-                if child.state == target:
-                    path = []
-                    while child.parent is not None:
-                        path.append((child.action, child.state))
-                        child = child.parent
-                    path.reverse()
-                    return path
-
                 frontier.add(child)
 
-    # TODO
-    raise NotImplementedError
+    # If no path is found, return None
+    return None
 
 
 def person_id_for_name(name):
